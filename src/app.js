@@ -1,11 +1,34 @@
-const express = require("express"); //i am referencing that express folder in node_modules
+const express = require("express");
+const { connectDB } = require("./config/database");
+const cors = require("cors");
+const app = express();
 
-const app = express(); //instance of express js application (creating a new server/app)
+const cookieParser = require("cookie-parser");
 
-app.use("/contact", (req, res) => {
-  res.send("hello from the server");
-});
+const authRouter = require("./routes/auth.js");
+const profileRouter = require("./routes/profile.js");
+const requestRouter = require("./routes/requests.js");
+const userRouter = require("./routes/user.js");
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+app.use(express.json());
+app.use(cookieParser());
+app.use("/", authRouter);
+app.use("/", profileRouter);
+app.use("/", requestRouter);
+app.use("/", userRouter);
 
-app.listen(8000, () => {
-  console.log("listening to port 8000");
-}); //now my app is ready to listening to outer world request
+connectDB()
+  .then(() => {
+    console.log("database connected successfully");
+    app.listen(8000, () => {
+      console.log("listening to port 8000");
+    });
+  })
+  .catch((err) => {
+    console.log("Database cannot be connected");
+  });
